@@ -30,6 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
       enableDebugging: false,
       payConfig: payConfig,
       onPaymentResult: (paymentResult, khalti) {
+        //This won't trigger
+        debugger();
         log('Payment Result: $paymentResult');
       },
       onMessage: (
@@ -39,11 +41,15 @@ class _HomeScreenState extends State<HomeScreen> {
         event,
         needsPaymentConfirmation,
       }) async {
+        //This won't trigger
+        debugger();
         log(
           'Description: $description, Status Code: $statusCode, Event: $event, NeedsPaymentConfirmation: $needsPaymentConfirmation',
         );
       },
       onReturn: () async {
+        //This won't trigger
+        debugger();
         log('Successfully redirected to return_url.');
       },
     );
