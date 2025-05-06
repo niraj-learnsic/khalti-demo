@@ -3,36 +3,44 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';
 
-final navKey = GlobalKey<NavigatorState>();
-
-// Replace with your actual Khalti public key and API URLs
-class AppUrls {
-  //This is test key
-  static const String khaltiPublicKey = "c99877cc9e4840d0a5aeff030c4d842c";
-  static const bool isProd = false; // Set to true for production
+void main() {
+  runApp(const MaterialApp(home: KhaltiSDKDemo()));
 }
 
-class PaymentData {
-  final String pidx;
-  PaymentData({required this.pidx});
+class KhaltiSDKDemo extends StatefulWidget {
+  const KhaltiSDKDemo({super.key});
+
+  @override
+  State<KhaltiSDKDemo> createState() => _KhaltiSDKDemoState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  Future<void> _onKhaltiCall() async {
+class _KhaltiSDKDemoState extends State<KhaltiSDKDemo> {
+  late final Future<Khalti?> khalti;
+
+  String pidx =
+      'EkYBo5XrUoBbx4w73AfkZM'; // Should be generated via a server-side POST request.
+//Try another one for testing: '3fv8tZYA3EijUAwmodKXKL'
+  PaymentResult? paymentResult;
+
+  @override
+  void initState() {
+    super.initState();
     final payConfig = KhaltiPayConfig(
-      publicKey: AppUrls.khaltiPublicKey,
-
-      //TODO: Replace with your own pidx
-      pidx: "PVcTbpnBqmA4baWQ8ZTFoB",
-      environment: AppUrls.isProd ? Environment.prod : Environment.test,
+      publicKey:
+          'c99877cc9e4840d0a5aeff030c4d842c', // This is a dummy public key for example purpose
+      pidx: pidx,
+      environment: Environment.test,
     );
-    Khalti? khalti = await Khalti.init(
-      enableDebugging: false,
+
+    khalti = Khalti.init(
+      enableDebugging: true,
       payConfig: payConfig,
       onPaymentResult: (paymentResult, khalti) {
-        //This won't trigger
-        debugger();
-        log('Payment Result: $paymentResult');
+        log(paymentResult.toString());
+        // setState(() {
+        //   this.paymentResult = paymentResult;
+        // });
+        // khalti.close(context);
       },
       onMessage: (
         khalti, {
@@ -41,75 +49,65 @@ class _HomeScreenState extends State<HomeScreen> {
         event,
         needsPaymentConfirmation,
       }) async {
-        //This won't trigger
-        debugger();
         log(
           'Description: $description, Status Code: $statusCode, Event: $event, NeedsPaymentConfirmation: $needsPaymentConfirmation',
         );
+        // khalti.close(context);
       },
-      onReturn: () async {
-        //This won't trigger
-        debugger();
+      onReturn: () {
         log('Successfully redirected to return_url.');
       },
     );
-    if (navKey.currentState!.mounted) {
-      khalti.open(navKey.currentState!.context);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Buy Item')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // Placeholder Item
-            Container(
-              padding: const EdgeInsets.all(20.0),
-              decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-              child: const Text(
-                'Placeholder Item',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await _onKhaltiCall();
-              },
-              child: const Text('Buy Now with Khalti'),
-            ),
-          ],
+        child: FutureBuilder(
+          future: khalti,
+          initialData: null,
+          builder: (context, snapshot) {
+            final khaltiSnapshot = snapshot.data;
+            if (khaltiSnapshot == null) {
+              return const CircularProgressIndicator.adaptive();
+            }
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Image.asset('assets/seru.png', height: 200, width: 200),
+                const SizedBox(height: 120),
+                const Text('Rs. 22', style: TextStyle(fontSize: 25)),
+                const Text('1 day fee'),
+                OutlinedButton(
+                  onPressed: () => khaltiSnapshot.open(context),
+                  child: const Text('Pay with Khalti'),
+                ),
+                const SizedBox(height: 120),
+                paymentResult == null
+                    ? Text('pidx: $pidx', style: const TextStyle(fontSize: 15))
+                    : Column(
+                      children: [
+                        Text('pidx: ${paymentResult!.payload?.pidx}'),
+                        Text('Status: ${paymentResult!.payload?.status}'),
+                        Text(
+                          'Amount Paid: ${paymentResult!.payload?.totalAmount}',
+                        ),
+                        Text(
+                          'Transaction ID: ${paymentResult!.payload?.transactionId}',
+                        ),
+                      ],
+                    ),
+                const SizedBox(height: 120),
+                const Text(
+                  'This is a demo application developed by some merchant.',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ],
+            );
+          },
         ),
       ),
-    );
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Khalti Buy App',
-      navigatorKey: navKey,
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomeScreen(),
     );
   }
 }
