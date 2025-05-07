@@ -18,16 +18,17 @@ class _KhaltiSDKDemoState extends State<KhaltiSDKDemo> {
   late final Future<Khalti?> khalti;
 
   String pidx =
-      'EkYBo5XrUoBbx4w73AfkZM'; // Should be generated via a server-side POST request.
-//Try another one for testing: '3fv8tZYA3EijUAwmodKXKL'
+      'rG5gEQHx9T7H3mXG3SufD9'; // Should be generated via a server-side POST request.
+
   PaymentResult? paymentResult;
 
   @override
   void initState() {
     super.initState();
     final payConfig = KhaltiPayConfig(
-      publicKey:
-          'c99877cc9e4840d0a5aeff030c4d842c', // This is a dummy public key for example purpose
+      publicKey: "c99877cc9e4840d0a5aeff030c4d842c",
+      // publicKey:
+      //     'c99877cc9e4840d0a5aeff030c4d842c', // This is a dummy public key for example purpose
       pidx: pidx,
       environment: Environment.test,
     );
