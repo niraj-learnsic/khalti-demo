@@ -18,7 +18,7 @@ class _KhaltiSDKDemoState extends State<KhaltiSDKDemo> {
   late final Future<Khalti?> khalti;
 
   String pidx =
-      'rG5gEQHx9T7H3mXG3SufD9'; // Should be generated via a server-side POST request.
+      'GaVjUGY8f7dhPyC6U2hAb8'; // Should be generated via a server-side POST request.
 
   PaymentResult? paymentResult;
 
